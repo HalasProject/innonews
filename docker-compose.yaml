@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    volumes:
+       - ./backend:/var/www/html
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: innonews_db
+      DB_USERNAME: innonews_root
+      DB_PASSWORD: azerty123
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    volumes:
+      - ./frontend:/app
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+  db:
+    image: mysql:latest
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: innonews_db
+      MYSQL_USER: innonews_root
+      MYSQL_PASSWORD: azerty123
+    volumes:
+      - db-bank:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    networks:
+      - app-network
+
+volumes:
+  db-bank:
+
+networks:
+  app-network:
