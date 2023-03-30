@@ -1,11 +1,16 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "innonews",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@heroicons/react": "^2.0.16",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.3.4",
+    "flowbite": "^1.6.4",
+    "flowbite-datepicker": "^1.2.2",
+    "notyf": "^3.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -34,5 +39,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "prettier": "2.8.7",
+    "tailwindcss": "^3.2.7"
   }
 }
