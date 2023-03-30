@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
@@ -42,3 +43,5 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::put('/user/update', [UserController::class, 'update']);
     Route::delete('/user/avatar', [UserController::class, 'removeAvatar']);
 });
+
+Route::get('/articles', [ArticleController::class, 'getArticles']);
