@@ -5,6 +5,7 @@ import { AuthContext } from "../providers/AuthProvider";
 import no_results from "../images/no-results.png";
 import ArticleSkeleton from "../components/ArticleSkeleton";
 import { ArticleContext } from "../providers/ArticleProvider";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 function Home() {
   const { toggleAuthPopup, user } = useContext(AuthContext);
   const { showLoader, articles } = useContext(ArticleContext);
@@ -28,12 +29,20 @@ function Home() {
             </span>
           )}
           {user && (
-            <span className="flex flex-row items-center justify-between space-x-4 px-5 py-2.5 transition-all ease-in duration-75 bg-whit bg-gray-900 rounded-md group-hover:bg-opacity-0">
+            <span className="flex flex-row items-center space-x-3 px-5 py-2.5 transition-all ease-in duration-75 bg-whit bg-gray-900 rounded-md group-hover:bg-opacity-0">
               <div className="bg-gray-400 w-8 h-8 rounded-full">
-                <img
-                  className="object-cover w-full h-full rounded-full"
-                  src={user.avatar}
-                />
+                {user.avatar && (
+                  <img
+                    className="object-cover w-full h-full rounded-full"
+                    src={`${process.env.REACT_APP_BACKEND_URL}/${user.avatar}`}
+                  />
+                )}
+                {!user.avatar && (
+                  <UserCircleIcon
+                    fill="none"
+                    className="w-full h-full rounded-full"
+                  />
+                )}
               </div>
               <span>{user.fullName}</span>
             </span>

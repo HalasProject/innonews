@@ -1,8 +1,4 @@
-import {
-  AtSymbolIcon,
-  LockClosedIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import ForgotPassword from "./ForgotPassword";
 import Login from "./Login";

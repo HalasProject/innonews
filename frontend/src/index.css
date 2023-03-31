@@ -2,10 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-
-  
 .scroll {
-  scrollbar-color: var(--scroll-thumb-color, grey) var(--scroll-track, transparent);
+  scrollbar-color: var(--scroll-thumb-color, grey)
+    var(--scroll-track, transparent);
   scrollbar-width: thin;
 }
 .scroll::-webkit-scrollbar {

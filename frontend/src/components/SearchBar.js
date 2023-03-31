@@ -41,9 +41,9 @@ function SearchBar() {
 
   const updateSource = (source) => {
     const updatedValue = { [source]: !sources[source] };
-    console.log({ updatedValue });
+
     const newObject = { ...sources, ...updatedValue };
-    console.log({ newObject });
+
     if (checkIfAtLeaseOneSourceIsTrue(newObject)) {
       setSources((prevState) => ({
         ...prevState,
@@ -81,10 +81,10 @@ function SearchBar() {
         </button>
         <div
           id="dropdown"
-          className=" hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+          className=" hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44"
         >
           <ul
-            className="py-2 text-sm text-gray-700 dark:text-gray-200"
+            className="py-2 text-sm text-gray-700"
             aria-labelledby="dropdown-button"
           >
             {categories.map((_category, index) => (
@@ -93,7 +93,7 @@ function SearchBar() {
                   type="button"
                   className={`${
                     _category == category ? "bg-gray-300" : "hover:bg-gray-100"
-                  } capitalize inline-flex w-full px-4 py-2  dark:hover:bg-gray-600 dark:hover:text-white`}
+                  } capitalize inline-flex w-full px-4 py-2`}
                 >
                   {_category == "" ? "All Categories" : _category}
                 </button>
@@ -114,10 +114,10 @@ function SearchBar() {
         </button>
         <div
           id="dropdown-source"
-          className="hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+          className="hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44"
         >
           <ul
-            className="text-sm text-gray-700 px-3 py-4 space-y-4 dark:text-gray-200"
+            className="text-sm text-gray-700 px-3 py-4 space-y-4"
             aria-labelledby="dropdown-button"
           >
             <li>
@@ -127,11 +127,11 @@ function SearchBar() {
                   type="checkbox"
                   checked={sources.newsapi}
                   onChange={() => updateSource("newsapi")}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600 "
                 />
                 <label
-                  for="default-checkbox"
-                  className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  htmlFor="default-checkbox"
+                  className="ml-2 text-sm font-medium text-gray-900 "
                 >
                   News API
                 </label>
@@ -144,11 +144,11 @@ function SearchBar() {
                   type="checkbox"
                   onChange={() => updateSource("nyt")}
                   checked={sources.nyt}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600"
                 />
                 <label
-                  for="default-checkbox"
-                  className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  htmlFor="default-checkbox"
+                  className="ml-2 text-sm font-medium text-gray-900"
                 >
                   The New York Time
                 </label>
@@ -161,11 +161,11 @@ function SearchBar() {
                   type="checkbox"
                   onChange={() => updateSource("guardian")}
                   checked={sources.guardian}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600 "
                 />
                 <label
-                  for="default-checkbox"
-                  className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  htmlFor="default-checkbox"
+                  className="ml-2 text-sm font-medium text-gray-900"
                 >
                   The Guardian
                 </label>
@@ -186,7 +186,7 @@ function SearchBar() {
             <input
               name="start"
               type="text"
-              className=" border text-sm block w-full pl-10 p-2.5  bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+              className="border text-sm block w-full pl-10 p-2.5 focus:outline-0  bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
               placeholder="from"
               onChange={(e) => console.log(e.target.value)}
             />
@@ -199,7 +199,7 @@ function SearchBar() {
             <input
               name="end"
               type="text"
-              className="border text-sm  block w-full pl-10 p-2.5  bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+              className="border text-sm  block w-full pl-10 p-2.5  bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
               placeholder="to"
             />
           </div>
@@ -217,7 +217,7 @@ function SearchBar() {
           <button
             type="submit"
             disabled={showLoader}
-            className="disabled:cursor-not-allowed absolute top-0 right-0 p-2.5 text-sm font-medium text-white rounded-r-lg border border-blue-700  4 focus:outline-none  bg-blue-600 hover:bg-blue-700 "
+            className="disabled:cursor-not-allowed absolute top-0 right-0 p-2.5 text-sm font-medium text-white rounded-r-lg border border-red-600  4 focus:outline-none  bg-red-600 hover:bg-red-700 "
           >
             {!showLoader && (
               <MagnifyingGlassIcon
@@ -231,7 +231,7 @@ function SearchBar() {
               <div role="status">
                 <svg
                   aria-hidden="true"
-                  className="w-5 h-5 relative animate-spin text-blue-400 fill-gray-100"
+                  className="w-5 h-5 relative animate-spin text-red-400 fill-gray-100"
                   viewBox="0 0 100 101"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"

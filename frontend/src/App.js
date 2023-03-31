@@ -6,9 +6,11 @@ import { AuthContext } from "./providers/AuthProvider";
 import axiosInstance from "./utils/axiosInstance";
 import { GET_ALL_ARTICLES, USER_INFO } from "./utils/api";
 import { ArticleContext } from "./providers/ArticleProvider";
+import UserPopup from "./components/UserPopup/UserPopup";
 
 function App() {
-  const { showAuthPopup, toggleAuthPopup, login } = useContext(AuthContext);
+  const { showAuthPopup, toggleAuthPopup, login, user } =
+    useContext(AuthContext);
   const { fetchArticles } = useContext(ArticleContext);
   const [loading, isLoading] = useState(true);
 
@@ -61,7 +63,12 @@ function App() {
           </div>
         </div>
       )}
-      {showAuthPopup && <AuthPopup togglePopup={toggleAuthPopup}></AuthPopup>}
+      {showAuthPopup && !user && (
+        <AuthPopup togglePopup={toggleAuthPopup}></AuthPopup>
+      )}
+      {showAuthPopup && user && (
+        <UserPopup togglePopup={toggleAuthPopup}></UserPopup>
+      )}
       <Home />
     </div>
   );

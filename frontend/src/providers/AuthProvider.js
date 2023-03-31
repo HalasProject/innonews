@@ -1,4 +1,5 @@
 import React, { useState, createContext } from "react";
+import axiosInstance from "../utils/axiosInstance";
 
 export const AuthContext = createContext();
 
@@ -11,6 +12,8 @@ export const AuthProvider = ({ children }) => {
     setUser(user);
     setToken(token);
     localStorage.setItem("token", token);
+    axiosInstance.defaults.headers.common["Authorization"] = "Bearer " + token;
+    setShowAuthPopup(false);
   };
 
   const logout = () => {
@@ -29,6 +32,7 @@ export const AuthProvider = ({ children }) => {
         showAuthPopup,
         toggleAuthPopup,
         token,
+        setUser,
         user,
         login,
         logout,
