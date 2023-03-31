@@ -44,7 +44,7 @@ class ArticleController extends Controller
     {
         $options =  [
             'q' =>  $params['search'],
-            'apiKey' => '56013366fe0249918d5c26e30662f688',
+            'apiKey' => env('API_KEY_NEWSAPI'),
             'language' => 'en'
         ];
 
@@ -79,7 +79,7 @@ class ArticleController extends Controller
     {
         $options =  [
             'q' =>  '',
-            'api-key' => 'c6182cea-7fe2-4e39-af5a-de27fba7576e',
+            'api-key' => env('API_KEY_GUARDIAN'),
             'show-fields' => 'headline,thumbnail,short-url,wordcount,publication'
         ];
         if ($params['from_date']) $options['from-date'] =  str_replace("/", '-', $params['from_date']);
@@ -128,7 +128,7 @@ class ArticleController extends Controller
     {
         $options =  [
             'q' =>  $params['search'],
-            'api-key' => '7tMP81b0aAvaBmR8VRHhO2E90cYtIJLt'
+            'api-key' => env('API_KEY_NYT')
         ];
         if ($params['from_date']) $options['begin_date'] =  str_replace(['-', '/'], '', $params['from_date']);
         if ($params['to_date'])  $options['end_date'] = str_replace(['-', '/'], '', $params['to_date']);
