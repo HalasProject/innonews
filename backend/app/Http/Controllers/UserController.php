@@ -32,6 +32,7 @@ class UserController extends Controller
      */
     public function update(Request $request)
     {
+        
         $fields = $request->validate([
             "firstname" => 'filled|string',
             "lastname" => 'filled|string',
@@ -40,19 +41,17 @@ class UserController extends Controller
         ]);
 
         $user = $request->user();
-
         $sendEmailVerification = false;
-
-        if (Arr::has($fields, 'birthday')) {
-            $user->birthday  = Carbon::createFromFormat('Y-m-d', $fields['birthday']);
-            $user->save();
-        }
 
         if (Arr::has($fields, 'email')) {
             if ($user->email !== $fields['email']) {
                 $existUserWithEmail = User::where('email', $fields['email'])->first();
                 if ($existUserWithEmail) {
-                    return new JsonResponse(['success' => false, 'message' => "Email already exists"], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse([
+                        "errors" => [
+                            'email' => ["Thex email has already been taken."],
+                        ]
+                    ], Response::HTTP_UNPROCESSABLE_ENTITY);
                 } else {
                     $fields['email_verified_at'] = null;
                     $sendEmailVerification = true;
@@ -120,9 +119,10 @@ class UserController extends Controller
 
         if (!Hash::check($request->current_password, $user->password)) {
             return new JsonResponse([
-                'success' => false,
-                'message' => 'Bad password'
-            ], Response::HTTP_UNAUTHORIZED);
+                "errors" => [
+                    'current_password' => ["Incorrect current password"],
+                ]
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $user->forceFill([

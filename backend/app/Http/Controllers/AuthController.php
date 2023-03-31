@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,19 +17,23 @@ class AuthController extends Controller
     public function register(Request $request)
     {
 
-        $fields = $request->validate([
+        $validator = Validator::make($request->all(), [
             "email" => 'required|email|string|unique:users,email',
             "password" => 'required|confirmed|string|min:8',
             "firstname" => 'required|string',
             "lastname" => 'required|string'
         ]);
 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
         $user = User::create([
-            'email' => $fields['email'],
+            'email' => $request->input('email'),
             'password' =>  Hash::make($request->input('password')),
             'last_login' => Carbon::now(),
-            'firstname' => $fields['firstname'],
-            'lastname' => $fields['lastname'],
+            'firstname' => $request->input('firstname'),
+            'lastname' => $request->input('lastname'),
         ]);
 
         $token = $user->createToken($request->header('User-Agent'))->plainTextToken;
@@ -41,17 +46,22 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $fields = $request->validate([
-            "email" => 'required|string',
-            "password" => 'required|string',
+
+        $validator = Validator::make($request->all(), [
+            "email" => 'required|email',
+            "password" => 'required|string|min:8',
         ]);
 
-        $user = User::where('email', $fields['email'])->first();
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = User::where('email', $request->input('email'))->first();
 
         // Check Password
-        if (!$user || !Hash::check($fields['password'], $user->password)) {
+        if (!$user || !Hash::check($request->input('password'), $user->password)) {
             return response([
-                'message' => "Email ou mot de passe invalide",
+                'message' => "Wrong email or password",
                 'success' => false
             ], Response::HTTP_UNAUTHORIZED);
         }
@@ -70,7 +80,13 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $validator = Validator::make($request->all(), [
+            "email" => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $status = Password::sendResetLink(
             $request->only('email')
