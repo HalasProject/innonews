@@ -19,7 +19,9 @@ RUN apk add --no-cache \
     && docker-php-ext-install zip \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN cd /var/www/html \
     && composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev \
     && cp .env.example .env \
     && php artisan key:generate \
@@ -29,7 +31,6 @@ RUN apk add --no-cache \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage
-
 
 RUN echo "upload_max_filesize = 32M" >> /usr/local/etc/php/php.ini \
     && echo "post_max_size = 32M" >> /usr/local/etc/php/php.ini
