@@ -9,6 +9,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class UserController extends Controller
@@ -21,7 +23,11 @@ class UserController extends Controller
      */
     public function show(Request $request)
     {
-        return new JsonResponse(['success' => true, 'result' => User::where('id', $request->user()->id)->first()], Response::HTTP_OK);
+        auth()->user()->feed;
+        return new JsonResponse([
+            'success' => true,
+            'result' => auth()->user()
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -32,15 +38,22 @@ class UserController extends Controller
      */
     public function update(Request $request)
     {
-        
-        $fields = $request->validate([
+
+        $validator = Validator::make($request->all(), [
             "firstname" => 'filled|string',
             "lastname" => 'filled|string',
             "email" => 'filled|email',
             "avatar" => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $user = $request->user();
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $fields = $request->all();
+
+        $user = auth()->user();
         $sendEmailVerification = false;
 
         if (Arr::has($fields, 'email')) {
@@ -49,7 +62,7 @@ class UserController extends Controller
                 if ($existUserWithEmail) {
                     return new JsonResponse([
                         "errors" => [
-                            'email' => ["Thex email has already been taken."],
+                            'email' => ["This email has already been taken."],
                         ]
                     ], Response::HTTP_UNPROCESSABLE_ENTITY);
                 } else {
@@ -68,9 +81,11 @@ class UserController extends Controller
             $fields['avatar'] = str_replace('public/', 'storage/', $file_path);
         }
 
-        User::find($user->id)->update($fields);
+        $user->update($fields);
+        $user->save();
+        $user->feed;
 
-        $response = ['success' => true, 'result' => User::find($user->id)->fresh()];
+        $response = ['success' => true, 'result' => $user];
 
         if ($sendEmailVerification) {
             $user->sendEmailVerificationNotification();
@@ -78,6 +93,37 @@ class UserController extends Controller
         }
 
         return new JsonResponse($response, Response::HTTP_OK);
+    }
+
+    public function updateFeed(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "cateogry" => ['filled', 'string', Rule::in(['*', 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'])],
+            "sources" => 'required|array',
+            "sources.*" => 'boolean',
+            "date_from" => 'nullable',
+            "date_to" => 'nullable'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = auth()->user(); // Get the current connected user
+        $feed = $user->feed; // Get the user's feed
+
+        // update the feed attributes based on the request body
+        $feed->category = data_get(request(), 'category', $feed->category);
+        $feed->newsapi = data_get(request('sources'), 'newsapi', $feed->newsapi);
+        $feed->nyt = data_get(request('sources'), 'nyt', $feed->nyt);
+        $feed->theguardian = data_get(request('sources'), 'theguardian', $feed->theguardian);
+        $feed->date_from = data_get(request(), 'date_from', $feed->date_from);
+        $feed->date_to = data_get(request(), 'date_to', $feed->date_to);
+
+        // save the updated feed
+        $feed->save();
+
+        return new JsonResponse(['success' => true, 'result' => $feed], Response::HTTP_OK);
     }
 
     /**

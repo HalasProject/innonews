@@ -30,11 +30,6 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
     ->name('verification.verify');
 
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [UserController::class, 'show']);
@@ -42,6 +37,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/email/sendlink', [UserController::class, 'emailSendVerifyLink']);
     Route::put('/user/update', [UserController::class, 'update']);
     Route::delete('/user/avatar', [UserController::class, 'removeAvatar']);
+    Route::put('user/feed', [UserController::class, 'updateFeed']);
+    Route::get('/articles/feed', [ArticleController::class, 'getArticles'])->name('feed');
 });
 
-Route::get('/articles', [ArticleController::class, 'getArticles']);
+Route::get('/articles', [ArticleController::class, 'getArticles'])->name('articles');

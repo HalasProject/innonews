@@ -6,19 +6,47 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
 {
     public function getArticles(Request $request)
     {
+
+        $validator = Validator::make($request->all(), [
+            'category' => [
+                'nullable',
+                Rule::in(['*', 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'])
+            ]
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
         $params = [
             'search' => $request->get('search', ''),
             'from_date' => $request->get('from_date', ''),
             'to_date' => $request->get('to_date', ''),
-            'category' => $request->get('category', ''),
+            'category' => $request->get('category', '*'),
         ];
-
         $sources = $request->get('source');
+
+        // Get feed of current user
+        if (Route::currentRouteName() == 'feed') {
+            $user = auth()->user();
+            $feed = $user->feed->toArray();
+
+            $params = [
+                'search' => $request->get('search', ''),
+                'from_date' => $feed['date_from'],
+                'to_date' => $feed['date_to'],
+                'category' => $feed['category'],
+            ];
+            $sources = $feed['sources'];
+        }
 
         $articles = collect([]);
         if (filter_var($sources['nyt'], FILTER_VALIDATE_BOOLEAN)) {
@@ -29,7 +57,7 @@ class ArticleController extends Controller
             $articles = $articles->merge($this->newsApi($params));
         }
 
-        if (filter_var($sources['guardian'], FILTER_VALIDATE_BOOLEAN)) {
+        if (filter_var($sources['theguardian'], FILTER_VALIDATE_BOOLEAN)) {
             $articles = $articles->merge($this->theGuardianApi($params));
         }
 
@@ -50,18 +78,16 @@ class ArticleController extends Controller
 
         if ($params['from_date']) $options['from'] = str_replace('/', '-', $params['from_date']);
         if ($params['to_date']) $options['to'] = str_replace('/', '-', $params['to_date']);
-        if ($params['category']) $options['category'] = $params['category'];
+        if ($params['category'] != '*') $options['category'] = $params['category'];
 
         $link = 'https://newsapi.org/v2/' . ($params['category'] || is_null($options['q']) ? 'top-headlines' : 'everything');
         try {
             $response = Http::get($link, $options);
             $articles = collect($response->json()['articles']);
-
-
             $articles = $articles->map(function ($article) {
                 return collect([
                     "title" => $article["title"],
-                    "image" => $article["urlToImage"],
+                    "image" => $article["urlToImage"] ?? null,
                     "source" => "newsapi",
                     "web_url" =>  $article["url"],
                     "pub_date" => Carbon::parse($article["publishedAt"])->diffForHumans(),
@@ -78,19 +104,19 @@ class ArticleController extends Controller
     public function theGuardianApi($params)
     {
         $options =  [
-            'q' =>  '',
+            'q' =>  $params['search'],
             'api-key' => env('API_KEY_GUARDIAN'),
             'show-fields' => 'headline,thumbnail,short-url,wordcount,publication'
         ];
         if ($params['from_date']) $options['from-date'] =  str_replace("/", '-', $params['from_date']);
         if ($params['to_date']) $options['to-date'] = str_replace("/", '-', $params['to_date']);
-        if ($params['category']) {
+        if ($params['category'] != '*') {
             $CategoryToSection = [
                 "business" => "business|education|money",
                 "entertainment" => "extra|fashion|film|music|games|help|lifeandstyle|media",
                 "general" => "world|info|community|culture|news|society|weather",
                 "health" => "environment|food|travel",
-                "science" => "science|books",
+                "science" => "science",
                 "sports" => "sport|football",
                 "technology" => "technology"
             ];
@@ -99,12 +125,11 @@ class ArticleController extends Controller
 
         try {
             $response = Http::get('https://content.guardianapis.com/search', $options);
-
             $articles = collect($response->json()['response']['results']);
             $articles = $articles->map(function ($article) {
                 return collect([
                     "title" => $article["fields"]["headline"],
-                    "image" => $article["fields"]["thumbnail"],
+                    "image" => $article["fields"]["thumbnail"] ?? null,
                     "source" => 'theguardian',
                     "web_url" =>  $article["webUrl"],
                     "pub_date" => Carbon::parse($article["webPublicationDate"])->diffForHumans(),
@@ -112,6 +137,7 @@ class ArticleController extends Controller
                     "time_to_read" => $this->timeToReadWord($article["fields"]["wordcount"])
                 ]);
             });
+
             return collect($articles);
         } catch (\Exception $e) {
             return collect([]);
@@ -132,7 +158,7 @@ class ArticleController extends Controller
         ];
         if ($params['from_date']) $options['begin_date'] =  str_replace(['-', '/'], '', $params['from_date']);
         if ($params['to_date'])  $options['end_date'] = str_replace(['-', '/'], '', $params['to_date']);
-        if ($params['category']) {
+        if ($params['category'] != '*') {
             $CategoryToSection = [
                 "business" => '"Business", "Education" , "money"',
                 "entertainment" => '"Movies" , "fashion" , "film", "music", "games", "help", "lifeandstyle", "media"',
