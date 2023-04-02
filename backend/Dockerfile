@@ -24,7 +24,7 @@ RUN apk add --no-cache \
     && cp .env.example .env \
     && php artisan key:generate \
     && php artisan storage:link \
-    && php artisan optimize --force \
+    && php artisan optimize \
     && touch /var/www/html/storage/logs/laravel.log \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/bootstrap/cache \
