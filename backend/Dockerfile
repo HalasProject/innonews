@@ -1,39 +1,38 @@
 FROM php:8.0-fpm-alpine
 
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy source code
-COPY . .
+ARG user
+ARG uid
 
 # Install dependencies
 RUN apk add --no-cache \
     $PHPIZE_DEPS \
     openssl-dev \
     libzip-dev \
+    git \
+    curl \
     zip \
+    unzip \
     nginx \
-    supervisor \
-    && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-install opcache \
-    && docker-php-ext-install zip \
-    && pecl install mongodb \
-    && docker-php-ext-enable mongodb \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    supervisor
 
-RUN cd /var/www/html \
-    && composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev \
-    && cp .env.example .env \
-    && php artisan key:generate \
-    && php artisan storage:link \
-    && php artisan optimize \
-    && touch /var/www/html/storage/logs/laravel.log \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql zip opcache
 
-RUN echo "upload_max_filesize = 32M" >> /usr/local/etc/php/php.ini \
-    && echo "post_max_size = 32M" >> /usr/local/etc/php/php.ini
+# Get latest Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Create system user to run Composer and Artisan Commands
+RUN adduser -u $uid -D -h /home/$user $user && \
+    mkdir -p /home/$user/.composer && \
+    chown -R $user:$user /home/$user
+
+# Copy project and install dep
+WORKDIR /var/www/html
+
+# Update php.ini
+RUN echo "upload_max_filesize = 32M" >> /usr/local/etc/php/php.ini
+RUN echo "post_max_size = 32M" >> /usr/local/etc/php/php.ini
+RUN echo "allow_url_fopen=on" >> /usr/local/etc/php/php.ini
 
 # Remove default nginx configuration file
 RUN rm -f /etc/nginx/http.d/default.conf
@@ -44,10 +43,10 @@ COPY nginx.conf /etc/nginx/http.d
 # Copy supervisord configuration file
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Switch to non-root user
-# USER www-data
-
+# Expose Nginx Server Port
 EXPOSE 8080
 
 # Start supervisord
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+USER $user

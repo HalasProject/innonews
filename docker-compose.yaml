@@ -3,6 +3,9 @@ version: '3.8'
 services:
   backend:
     build:
+      args:
+        user: doe
+        uid: 1000
       context: ./backend
       dockerfile: Dockerfile
     container_name: backend
