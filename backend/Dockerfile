@@ -25,6 +25,9 @@ RUN apk add --no-cache \
     && chmod -R 775 /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage
 
+RUN echo "upload_max_filesize = 32M" >> /usr/local/etc/php/php.ini \
+    && echo "post_max_size = 32M" >> /usr/local/etc/php/php.ini
+
 # Remove default nginx configuration file
 RUN rm -f /etc/nginx/http.d/default.conf
 
