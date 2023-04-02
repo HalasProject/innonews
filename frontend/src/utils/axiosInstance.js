@@ -3,10 +3,9 @@ import axios from "axios";
 const instance = axios.create();
 
 instance.interceptors.response.use(
-  (response) => response, // If the response is OK, continue
+  (response) => response,
   (error) => {
-    if (error.response?.data?.message === "Unauthenticated") {
-      // If the response is 403, remove the token from local storage
+    if (error.response?.data?.message === "Unauthenticated.") {
       if (localStorage.getItem("token")) {
         localStorage.removeItem("token");
         window.location.reload();

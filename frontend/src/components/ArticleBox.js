@@ -2,6 +2,7 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import nyc_logo from "../images/new_york_time.png";
 import newsapi_logo from "../images/news_api.png";
 import theguardian_logo from "../images/the_guardian.png";
+import React from "react";
 function ArticleBox({
   article: {
     title,
@@ -25,9 +26,10 @@ function ArticleBox({
         return "https://place-hold.it/120x120";
     }
   };
+
   return (
     <div
-      className="w-96 border border-gray-600 shadow-xl bg-gray-700 
+      className="w-96 hover:bg-gray-600/80 snap-center border  border-gray-600 shadow-xl bg-gray-700 
         rounded-xl flex flex-col items-start p-8 space-y-4"
     >
       <div id="article_icon" className="flex flex-row justify-between w-full">
@@ -39,10 +41,12 @@ function ArticleBox({
         <a
           href={web_url}
           target="_blank"
-          className="bg-purple-500 rounded-md space-x-3 flex flex-row items-center justify-between p-3"
+          class="relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800"
         >
-          <h1 className="text-white text-xs font-mono ">Read Article</h1>
-          <ArrowTopRightOnSquareIcon color="white" width={16} />
+          <span class="relative px-5 flex  py-2.5 transition-all space-x-2 ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+            <p>Read Article</p>
+            <ArrowTopRightOnSquareIcon color="white" width={16} />
+          </span>
         </a>
       </div>
       <a
@@ -50,6 +54,7 @@ function ArticleBox({
         href={web_url}
         target="_blank"
         className="text-xl text-gray-200 font-semibold"
+        rel="noreferrer"
       >
         <h1>{title}</h1>
       </a>

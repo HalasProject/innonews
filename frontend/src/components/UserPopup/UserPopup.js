@@ -1,5 +1,5 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import UserProfile from "./UserProfile";
 import UserSecurity from "./UserSecurity";
@@ -8,10 +8,22 @@ import UserFeed from "./UserFeed";
 function UserPopup({ togglePopup }) {
   const [selectedTab, setSelectedTab] = useState("profile");
   const { logout } = useContext(AuthContext);
-
-  const tabs = ["profile", "security", "feed"];
+  const tabs = [
+    {
+      name: "profile",
+      icon: "🪪",
+    },
+    {
+      name: "security",
+      icon: "🔒",
+    },
+    {
+      name: "feed",
+      icon: "⚡️",
+    },
+  ];
   return (
-    <div className="bg-gray-500/75 absolute flex justify-center align-center h-screen w-full text-white">
+    <div className="bg-gray-500/75 z-40 absolute flex justify-center align-center h-screen w-full text-white">
       <div className="divide-y divide-slate-600 absolute bottom-0 top-0 m-auto h-fit z-10  bg-gray-800 rounded-xl shadow-lg">
         <div
           id="auth_header"
@@ -25,30 +37,31 @@ function UserPopup({ togglePopup }) {
           ></XMarkIcon>
         </div>
 
-        <div className="border-b border-gray-200 dark:border-gray-700">
+        <div className="border-b border-gray-700">
           <ul
             className="flex items-center justify-center flex-wrap -mb-px text-sm font-medium text-center"
             id="myTab"
             data-tabs-toggle="#myTabContent"
             role="tablist"
           >
-            {tabs.map((tab, key) => (
+            {tabs.map(({ name, icon }, key) => (
               <li key={key} className="mr-2" role="presentation">
                 <button
-                  onClick={() => setSelectedTab(tab)}
-                  className={`capitalize inline-block p-4 rounded-t-lg ${
-                    tab == selectedTab
+                  onClick={() => setSelectedTab(name)}
+                  className={`inline-block p-4 rounded-t-lg ${
+                    name == selectedTab
                       ? "border-b-2"
-                      : "border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                      : "border-transparent hover:text-gray-300"
                   }`}
-                  id={`${tab}-tab`}
-                  data-tabs-target={`#${tab}`}
+                  id={`${name}-tab`}
+                  data-tabs-target={`#${name}`}
                   type="button"
                   role="tab"
-                  aria-controls={tab}
+                  aria-controls={name}
                   aria-selected="false"
                 >
-                  {tab}
+                  <span className="mr-2">{icon}</span>{" "}
+                  <span className="capitalize">{name}</span>
                 </button>
               </li>
             ))}

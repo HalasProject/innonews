@@ -1,15 +1,16 @@
-// business, entertainment, general, health, science, sports, technology
-
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import {
-  CalendarDaysIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
+  NewspaperIcon,
 } from "@heroicons/react/24/outline";
 import { ArticleContext } from "../providers/ArticleProvider";
-import DateRangePicker from "flowbite-datepicker/DateRangePicker";
+import Spinner from "./Spinner";
+import Datepicker from "react-tailwindcss-datepicker";
+import { checkIfAtLeaseOneSourceIsTrue } from "../utils/helpers";
+import { AuthContext } from "../providers/AuthProvider";
 
-function SearchBar() {
+const SearchBar = React.memo(() => {
   const {
     fetchArticles,
     sources,
@@ -18,29 +19,26 @@ function SearchBar() {
     showLoader,
     setSearch,
     setCategory,
+    categories,
     category,
+    fetchFeedArticles,
+    setDate,
+    date,
   } = useContext(ArticleContext);
+  const { user } = useContext(AuthContext);
+  const handleCategory = async (_category) => {
+    setCategory(_category);
+  };
 
-  const categories = [
-    "",
-    "business",
-    "entertainment",
-    "general",
-    "health",
-    "science",
-    "sports",
-    "technology",
-  ];
+  const handleDateChange = async (_dates) => {
+    setDate((prev) => ({
+      ...prev,
+      ..._dates,
+    }));
+  };
 
-  useEffect(() => {
-    const dateRangePickerEl = document.getElementById("dateRangePickerId");
-    new DateRangePicker(dateRangePickerEl, {
-      // options
-    });
-  }, []);
-
-  const updateSource = (source) => {
-    const updatedValue = { [source]: !sources[source] };
+  const handleSourceChange = async (_source) => {
+    const updatedValue = { [_source]: !sources[_source] };
 
     const newObject = { ...sources, ...updatedValue };
 
@@ -52,69 +50,88 @@ function SearchBar() {
     }
   };
 
-  const checkIfAtLeaseOneSourceIsTrue = (sources) => {
-    for (let source in sources) {
-      if (sources[source]) {
-        return true;
-      }
-    }
-    return false;
-  };
+  useEffect(() => {
+    fetchArticles();
+  }, [category, date, sources]);
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        fetchArticles();
+        await fetchArticles();
       }}
-      className="px-4"
+      className="flex flex-col  items-center justify-center space-y-3  md:flex-row md:space-y-0"
     >
-      <div className="flex">
+      <div className="w-full md:max-w-max">
+        {user && (
+          <div
+            onClick={async () => await fetchFeedArticles()}
+            className="flex md:hidden hover:bg-gray-700 cursor-pointer px-4 py-2 rounded-md justify-center items-center space-x-2 text-white"
+          >
+            <span className="font-medium text-md">My feed</span>
+            <NewspaperIcon color="white" width={28} />
+          </div>
+        )}
+      </div>
+      <div className="w-full md:max-w-max">
         <button
           id="dropdown-button"
           data-dropdown-toggle="dropdown"
-          className="capitalize flex-shrink-0 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center  border rounded-l-lg  focus:outline-none  bg-gray-700 hover:bg-gray-600  text-white border-gray-600"
+          className="capitalize relative w-full rounded-r-lg md:rounded-r-none rounded-l-lg flex-shrink-0 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center  border r  focus:outline-none  bg-gray-700 hover:bg-gray-600  text-white border-gray-600"
           type="button"
         >
-          {category == "" ? "All Categories" : category}
-          <ChevronDownIcon className="w-4 h-4 ml-1" viewBox="0 0 20 20" />
+          {category == "*" ? "All Categories" : category}
+          <ChevronDownIcon
+            className="w-4 absolute md:static right-4 h-4 ml-1 "
+            viewBox="0 0 20 20"
+          />
         </button>
         <div
           id="dropdown"
-          className=" hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44"
+          className="hidden z-30 bg-white  rounded-lg shadow w-44"
         >
           <ul
-            className="py-2 text-sm text-gray-700"
+            className=" divide-y divide-gray-300/40 text-sm text-gray-700"
             aria-labelledby="dropdown-button"
           >
             {categories.map((_category, index) => (
-              <li key={index} onClick={() => setCategory(_category)}>
+              <li key={index} onClick={() => handleCategory(_category)}>
                 <button
                   type="button"
-                  className={`${
-                    _category == category ? "bg-gray-300" : "hover:bg-gray-100"
+                  className={`${index === 0 ? "rounded-t-lg pt-2.5" : ""} ${
+                    index === categories.length - 1 ? "rounded-b-lg pb-2.5" : ""
+                  } ${
+                    _category == category
+                      ? "bg-gray-500 text-white"
+                      : "hover:bg-gray-300"
                   } capitalize inline-flex w-full px-4 py-2`}
                 >
-                  {_category == "" ? "All Categories" : _category}
+                  {_category == "*" ? "All Categories" : _category}
                 </button>
               </li>
             ))}
           </ul>
         </div>
+      </div>
 
+      <div className="w-full md:max-w-max">
         <button
           id="dropdown-button"
           data-dropdown-toggle="dropdown-source"
-          className="flex-shrink-0 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center  border   focus:outline-none  bg-gray-700 hover:bg-gray-600  text-white border-gray-600"
+          className="flex-shrink-0 relative w-full inline-flex items-center rounded-lg md:rounded-none py-2.5 px-4 text-sm font-medium text-center  border   focus:outline-none  bg-gray-700 hover:bg-gray-600  text-white border-gray-600"
           type="button"
         >
           {Object.values(sources).reduce((source, item) => source + item, 0)}{" "}
           Sources
-          <ChevronDownIcon className="w-4 h-4 ml-1" viewBox="0 0 20 20" />
+          <ChevronDownIcon
+            className="w-4 h-4 ml-1  absolute md:static right-4"
+            viewBox="0 0 20 20"
+          />
         </button>
+
         <div
           id="dropdown-source"
-          className="hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44"
+          className="hidden z-30 bg-white divide-y divide-gray-100 rounded-lg shadow w-44"
         >
           <ul
             className="text-sm text-gray-700 px-3 py-4 space-y-4"
@@ -126,7 +143,7 @@ function SearchBar() {
                   id="default-checkbox"
                   type="checkbox"
                   checked={sources.newsapi}
-                  onChange={() => updateSource("newsapi")}
+                  onChange={() => handleSourceChange("newsapi")}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600 "
                 />
                 <label
@@ -142,7 +159,7 @@ function SearchBar() {
                 <input
                   id="default-checkbox"
                   type="checkbox"
-                  onChange={() => updateSource("nyt")}
+                  onChange={() => handleSourceChange("nyt")}
                   checked={sources.nyt}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600"
                 />
@@ -159,8 +176,8 @@ function SearchBar() {
                 <input
                   id="default-checkbox"
                   type="checkbox"
-                  onChange={() => updateSource("guardian")}
-                  checked={sources.guardian}
+                  onChange={() => handleSourceChange("theguardian")}
+                  checked={sources.theguardian}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600 "
                 />
                 <label
@@ -173,87 +190,50 @@ function SearchBar() {
             </li>
           </ul>
         </div>
+      </div>
 
-        <div
-          date-rangepicker
-          id="dateRangePickerId"
-          className="flex items-center"
+      <div className="w-full md:max-w-max">
+        <Datepicker
+          primaryColor={"red"}
+          value={date}
+          placeholder={"Date range"}
+          inputClassName="rounded-lg md:rounded-none w-full dark:!bg-gray-700"
+          showFooter={true}
+          onChange={handleDateChange}
+        />
+      </div>
+
+      <div className="w-full md:max-w-max relative">
+        <input
+          type="search"
+          id="search-dropdown"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="block p-2.5 w-full text-sm rounded-lg md:rounded-l-none md:rounded-r-lg  outlin  border-l-2 border bg-gray-700 border-l-gray-700  border-gray-600 placeholder-gray-400 text-white "
+          placeholder="Search Article"
+        />
+        <button
+          type="submit"
+          disabled={showLoader}
+          className="disabled:cursor-not-allowed absolute top-0 right-0 p-2.5 text-sm font-medium text-white rounded-r-lg border border-red-600  4 focus:outline-none  bg-red-600 hover:bg-red-700 "
         >
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <CalendarDaysIcon className="w-5 h-5 text-gray-400" />
-            </div>
-            <input
-              name="start"
-              type="text"
-              className="border text-sm block w-full pl-10 p-2.5 focus:outline-0  bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
-              placeholder="from"
-              onChange={(e) => console.log(e.target.value)}
+          {!showLoader && (
+            <MagnifyingGlassIcon
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             />
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <CalendarDaysIcon className="w-5 h-5 text-gray-400" />
+          )}
+          {showLoader && (
+            <div role="status">
+              <Spinner className="w-5 h-5 relative animate-spin text-red-400 fill-gray-100" />
             </div>
-            <input
-              name="end"
-              type="text"
-              className="border text-sm  block w-full pl-10 p-2.5  bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
-              placeholder="to"
-            />
-          </div>
-        </div>
-
-        <div className="relative w-1/4">
-          <input
-            type="search"
-            id="search-dropdown"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="block p-2.5 w-full text-sm rounded-r-lg  outlin  border-l-2 border bg-gray-700 border-l-gray-700  border-gray-600 placeholder-gray-400 text-white "
-            placeholder="Search Article"
-          />
-          <button
-            type="submit"
-            disabled={showLoader}
-            className="disabled:cursor-not-allowed absolute top-0 right-0 p-2.5 text-sm font-medium text-white rounded-r-lg border border-red-600  4 focus:outline-none  bg-red-600 hover:bg-red-700 "
-          >
-            {!showLoader && (
-              <MagnifyingGlassIcon
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              />
-            )}
-            {showLoader && (
-              <div role="status">
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5 relative animate-spin text-red-400 fill-gray-100"
-                  viewBox="0 0 100 101"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                    fill="currentColor"
-                  />
-                  <path
-                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                    fill="currentFill"
-                  />
-                </svg>
-                <span className="sr-only">Loading...</span>
-              </div>
-            )}
-            <span className="sr-only">Search</span>
-          </button>
-        </div>
+          )}
+        </button>
       </div>
     </form>
   );
-}
+});
 
 export default SearchBar;

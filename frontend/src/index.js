@@ -5,17 +5,16 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { AuthProvider } from "./providers/AuthProvider";
 import { ArticleProvider } from "./providers/ArticleProvider";
+import "flowbite/dist/flowbite.min.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
-  <React.StrictMode>
-    <AuthProvider>
-      <ArticleProvider>
-        <App />
-      </ArticleProvider>
-    </AuthProvider>
-  </React.StrictMode>
+  <AuthProvider>
+    <ArticleProvider>
+      <App />
+    </ArticleProvider>
+  </AuthProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -1,82 +1,92 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ArticleBox from "../components/ArticleBox";
 import SearchBar from "../components/SearchBar";
-import { AuthContext } from "../providers/AuthProvider";
 import no_results from "../images/no-results.png";
 import ArticleSkeleton from "../components/ArticleSkeleton";
 import { ArticleContext } from "../providers/ArticleProvider";
-import { UserCircleIcon } from "@heroicons/react/24/outline";
-function Home() {
-  const { toggleAuthPopup, user } = useContext(AuthContext);
-  const { showLoader, articles } = useContext(ArticleContext);
+import Navbar from "../components/Navbar";
+import "./Home.css";
+import dark0 from "../images/0-dark.png";
+import dark1 from "../images/1-dark.png";
+import dark4 from "../images/4-dark.png";
+import dark5 from "../images/5-dark.png";
+import dark6 from "../images/6-dark.png";
+import dark7 from "../images/7-dark.png";
+import dark8 from "../images/8-dark.png";
+import {
+  MagnifyingGlassCircleIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+
+const Home = React.memo(() => {
+  const { showLoader, articles, fetchArticles } = useContext(ArticleContext);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  useEffect(
+    () => async () => {
+      await fetchArticles();
+    },
+    []
+  );
   return (
-    <div className="text-bold bg-gray-800 flex flex-col h-screen overflow-hidden">
+    <div className="text-bold overflow-hidden h-screen flex flex-col">
+      <div className="w-full">
+        <Navbar />
+      </div>
+
       <div
-        id="header"
-        className="bg-gray-800 border-b-2 border-b-gray-500 flex flex-row justify-between items-center px-12 py-4 "
+        className="flex h-full overflow-hidden  max-h-max flex-col items-center bg-gray-800 space-y-8 pt-8"
+        style={{
+          backgroundImage: `
+        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+        url(${dark0}),
+        url(${dark1}),
+        url(${dark4}),
+        url(${dark5}),
+        url(${dark6}),
+        url(${dark7}),
+        url(${dark8})
+      `,
+        }}
       >
-        <div className="text-4xl text-gray-300 font-extralight">
-          Inno<span className="text-red-500">news</span>
+        <div className={`lg:block ${showSearchBar ? "block" : "hidden"}`}>
+          <SearchBar />
         </div>
 
-        <button
-          onClick={() => toggleAuthPopup(true)}
-          className="inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium rounded-lg group bg-gradient-to-br bg-from-purple-500 bg-to-pink-500 from-purple-500 to-pink-500 text-white focus:ring-4 focus:outline-none  focus:ring-purple-800"
-        >
-          {!user && (
-            <span className=" px-5 py-2.5 transition-all ease-in duration-75 bg-gray-900 rounded-md group-hover:bg-opacity-0">
-              Login / Register
-            </span>
+        <div className="scroll overflow-y-scroll  overflow-x-hidden pb-16">
+          {showLoader && (
+            <div className="w-full scroll px-8 place-items-center items-start grid grid-cols-1 md:grid-cols-2 gap-12">
+              {[...Array(2).keys()].map((article, index) => (
+                <ArticleSkeleton key={index} />
+              ))}
+            </div>
           )}
-          {user && (
-            <span className="flex flex-row items-center space-x-3 px-5 py-2.5 transition-all ease-in duration-75 bg-whit bg-gray-900 rounded-md group-hover:bg-opacity-0">
-              <div className="bg-gray-400 w-8 h-8 rounded-full">
-                {user.avatar && (
-                  <img
-                    className="object-cover w-full h-full rounded-full"
-                    src={`${process.env.REACT_APP_BACKEND_URL}/${user.avatar}`}
-                  />
-                )}
-                {!user.avatar && (
-                  <UserCircleIcon
-                    fill="none"
-                    className="w-full h-full rounded-full"
-                  />
-                )}
-              </div>
-              <span>{user.fullName}</span>
-            </span>
-          )}
-        </button>
-      </div>
-      <div className="flex flex-col items-center bg-gray-800 space-y-8 pt-8">
-        <SearchBar></SearchBar>
-        {showLoader && (
-          <div className="w-full shadow scroll overflow-x-hidden pb-64 h-screen overflow-y-scroll place-items-center items-start grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
-            {[...Array(3).keys()].map((key, index) => (
-              <ArticleSkeleton key={index} />
-            ))}
-          </div>
-        )}
-        {!showLoader && articles.length > 0 && (
-          <div className="w-full shadow scroll overflow-x-hidden pb-64 h-screen overflow-y-scroll place-items-center items-start grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
-            {articles.map((article, i) => (
-              <ArticleBox article={article} key={i}></ArticleBox>
-            ))}
-          </div>
-        )}
 
-        {!showLoader && articles.length == 0 && (
-          <div className="w-full flex flex-col items-center justify-center h-full">
-            <img className="w-80" src={no_results} />
-            <h1 className="text-xl lg:text-5xl text-gray-300 font-extralight">
-              No articles found. Please adjust your search.
-            </h1>
-          </div>
-        )}
+          {!showLoader && articles.length > 0 && (
+            <div className="w-full h-max scroll px-8 justify-items-center grid grid-cols-1 md:grid-cols-2 gap-12">
+              {articles.map((article, index) => (
+                <ArticleBox article={article} key={index}></ArticleBox>
+              ))}
+            </div>
+          )}
+
+          {!showLoader && articles.length == 0 && (
+            <div className="w-full flex flex-col px-8 items-center justify-center h-full">
+              <img className="w-80" src={no_results} />
+              <h1 className="text-xl lg:text-5xl text-gray-300 font-extralight">
+                No articles found. Please adjust your search.
+              </h1>
+            </div>
+          )}
+        </div>
+      </div>
+      <div
+        onClick={() => setShowSearchBar(!showSearchBar)}
+        className="lg:hidden absolute bg-red-700 text-white h-16 w-16 p-4 right-8 hover:bg-red-600 cursor-pointer bottom-8 shadow-lg rounded-full"
+      >
+        <MagnifyingGlassIcon fill="none" className="w-full h-full" />
       </div>
     </div>
   );
-}
+});
 
 export default Home;

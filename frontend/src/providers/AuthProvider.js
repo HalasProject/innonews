@@ -32,7 +32,6 @@ export const AuthProvider = ({ children }) => {
         showAuthPopup,
         toggleAuthPopup,
         token,
-        setUser,
         user,
         login,
         logout,

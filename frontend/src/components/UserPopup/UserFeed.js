@@ -1,72 +1,96 @@
-import { ChevronDownIcon, LockClosedIcon } from "@heroicons/react/24/outline";
-import { useContext, useState } from "react";
-import NotyfContext from "../../NotyfContext";
+import React, { useContext } from "react";
+import NotyfContext from "../../contexts/NotyfContext";
 import { ArticleContext } from "../../providers/ArticleProvider";
 import { AuthContext } from "../../providers/AuthProvider";
-import { REGISTER, USER_UPDATE_PASSWORD } from "../../utils/api";
+import { UPDATE_USER_FEED } from "../../utils/api";
 import axiosInstance from "../../utils/axiosInstance";
+import { checkIfAtLeaseOneSourceIsTrue } from "../../utils/helpers";
+
 function UserFeed() {
-  const categories = [
-    "",
-    "business",
-    "entertainment",
-    "general",
-    "health",
-    "science",
-    "sports",
-    "technology",
-  ];
+  const { categories } = useContext(ArticleContext);
+  const { user, setUser } = useContext(AuthContext);
+  const notyf = useContext(NotyfContext);
+  const sources = user.feed.sources;
 
-  const {
-    fetchArticles,
-    sources,
-    setSources,
-    search,
-    showLoader,
-    setSearch,
-    setCategory,
-    category,
-  } = useContext(ArticleContext);
-
-  const updateSource = (source) => {
+  const updateSource = async (source) => {
     const updatedValue = { [source]: !sources[source] };
 
     const newObject = { ...sources, ...updatedValue };
 
     if (checkIfAtLeaseOneSourceIsTrue(newObject)) {
-      setSources((prevState) => ({
-        ...prevState,
-        ...updatedValue,
-      }));
+      setUser({
+        ...user,
+        feed: {
+          ...user.feed,
+          sources: newObject,
+        },
+      });
+      try {
+        const { data } = await axiosInstance.put(UPDATE_USER_FEED, {
+          ...user.feed,
+          sources: newObject,
+        });
+        if (!data.success) {
+          notyf.error(data.message);
+        } else {
+          notyf.success("Your feed has been updated");
+        }
+
+        // login(data.result);
+      } catch (err) {
+        if (err.response.status === 422) {
+          // setErrors({ ...err.response.data.errors });
+        }
+        console.error(err);
+      }
     }
   };
 
-  const checkIfAtLeaseOneSourceIsTrue = (sources) => {
-    for (let source in sources) {
-      if (sources[source]) {
-        return true;
+  const handleCategoryChange = async (event) => {
+    try {
+      const { id } = event.target;
+      const feed = {
+        ...user.feed,
+        category: id,
+      };
+      setUser({
+        ...user,
+        feed,
+      });
+      const { data } = await axiosInstance.put(UPDATE_USER_FEED, feed);
+      if (!data.success) {
+        notyf.error(data.message);
+      } else {
+        notyf.success("Your feed has been updated");
       }
+
+      // login(data.result);
+    } catch (err) {
+      if (err.response.status === 422) {
+        // setErrors({ ...err.response.data.errors });
+      }
+      console.error(err);
     }
-    return false;
   };
 
   return (
-    <div className="flex flex-col items-center justify-center divide-gray-400 divide-y-2 space-y-8 ">
-      <div className="place-items-start items-start grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-8">
+    <div className="flex flex-col items-center justify-center divide-gray-400 divide-y-2 space-y-8 px-4">
+      <div className="place-items-start items-start grid grid-cols-2 xl:grid-cols-3 gap-4 mt-8">
         {categories.map((category, key) => (
           <div className="flex flex-row items-center" key={key}>
             <input
-              id="default-radio-1"
+              id={category}
               type="radio"
-              value=""
-              name="default-radio"
-              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              checked={category == user.feed.category}
+              onChange={handleCategoryChange}
+              name="category-radio"
+              className="w-4 h-4 cursor-pointer text-blue-600  focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
             />
             <label
-              for="default-radio-1"
-              class="capitalize ml-2 text-sm font-medium text-gray-300"
+              htmlFor="radio-1"
+              className="capitalize ml-2 text-sm font-medium text-gray-300"
             >
-              {category == "" ? "All" : category}
+              {category == "*" ? "All" : category}
             </label>
           </div>
         ))}
@@ -80,7 +104,7 @@ function UserFeed() {
             <input
               id="default-checkbox"
               type="checkbox"
-              checked={sources.newsapi}
+              checked={user.feed.sources.newsapi}
               onChange={() => updateSource("newsapi")}
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600 "
             />
@@ -98,7 +122,7 @@ function UserFeed() {
               id="default-checkbox"
               type="checkbox"
               onChange={() => updateSource("nyt")}
-              checked={sources.nyt}
+              checked={user.feed.sources.nyt}
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600"
             />
             <label
@@ -114,8 +138,8 @@ function UserFeed() {
             <input
               id="default-checkbox"
               type="checkbox"
-              onChange={() => updateSource("guardian")}
-              checked={sources.guardian}
+              onChange={() => updateSource("theguardian")}
+              checked={user.feed.sources.theguardian}
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-600 "
             />
             <label

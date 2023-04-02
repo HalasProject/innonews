@@ -1,5 +1,5 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import React, { useState } from "react";
 import ForgotPassword from "./ForgotPassword";
 import Login from "./Login";
 import Register from "./Register";
@@ -26,7 +26,7 @@ function AuthPopup({ togglePopup }) {
     if (screenType == "login") {
       return (
         <span>
-          Don't have an account ?{" "}
+          {"Don't have an account ?"}
           <a
             onClick={() => setScreenType("register")}
             className="underline cursor-pointer"
@@ -51,7 +51,7 @@ function AuthPopup({ togglePopup }) {
   };
 
   return (
-    <div className="bg-gray-500/75 absolute flex justify-center align-center h-screen w-full text-white">
+    <div className="bg-gray-500/75 z-40 absolute flex justify-center align-center h-screen w-full text-white">
       <div className="divide-y divide-slate-600 absolute bottom-0 top-0 m-auto max-w-md h-fit z-30  bg-gray-800 rounded-xl shadow-lg">
         <div
           id="auth_header"
