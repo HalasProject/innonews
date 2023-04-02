@@ -23,7 +23,6 @@ RUN apk add --no-cache \
     && composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev \
     && cp .env.example .env \
     && php artisan key:generate \
-    && php artisan migrate --force \
     && php artisan storage:link \
     && php artisan optimize --force \
     && touch /var/www/html/storage/logs/laravel.log \
