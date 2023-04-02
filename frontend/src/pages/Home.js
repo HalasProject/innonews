@@ -13,10 +13,7 @@ import dark5 from "../images/5-dark.png";
 import dark6 from "../images/6-dark.png";
 import dark7 from "../images/7-dark.png";
 import dark8 from "../images/8-dark.png";
-import {
-  MagnifyingGlassCircleIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 const Home = React.memo(() => {
   const { showLoader, articles, fetchArticles } = useContext(ArticleContext);
@@ -54,15 +51,15 @@ const Home = React.memo(() => {
 
         <div className="scroll overflow-y-scroll  overflow-x-hidden pb-16">
           {showLoader && (
-            <div className="w-full scroll px-8 place-items-center items-start grid grid-cols-1 md:grid-cols-2 gap-12">
-              {[...Array(2).keys()].map((article, index) => (
+            <div className="w-full scroll px-8 place-items-center items-start grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
+              {[...Array(3).keys()].map((article, index) => (
                 <ArticleSkeleton key={index} />
               ))}
             </div>
           )}
 
           {!showLoader && articles.length > 0 && (
-            <div className="w-full h-max scroll px-8 justify-items-center grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="w-full h-max scroll px-8 justify-items-center grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
               {articles.map((article, index) => (
                 <ArticleBox article={article} key={index}></ArticleBox>
               ))}
