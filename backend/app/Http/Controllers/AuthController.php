@@ -39,7 +39,7 @@ class AuthController extends Controller
         $token = $user->createToken($request->header('User-Agent'))->plainTextToken;
 
         return new JsonResponse(['success' => true, 'result' => [
-            'user' => User::find($user->id),
+            'user' => User::with('feed')->find($user->id),
             'token' => $token
         ]], Response::HTTP_CREATED);
     }
