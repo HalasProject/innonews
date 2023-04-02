@@ -1,4 +1,4 @@
-# Web Application with Docker
+# Innonews
 
 This web application uses Docker to create a portable development environment. It consists of three Docker containers: frontend, backend, and MySql database.
 
@@ -14,21 +14,37 @@ This web application uses Docker to create a portable development environment. I
 `git clone https://github.com/halasproject/innonews.git`
 
 2. Navigate to the project directory:
+
 `cd innonews`
 
-3. Build the Docker containers:
+4. Copy environneemnt file
+
+`cp backend/.env.example .env`
+
+4. Build the Docker containers:
+
 `docker-compose build`
 
-4. Start the application:
-`docker-compose up`
+5. Start the application:
 
+`docker-compose up -d`
 
-The application should now be running on http://localhost:3000/ for the frontend and http://localhost:8080/ for the backend.
+6. Install depencenceoes:
 
+`docker-compose exec backend composer install`
+
+7. Generate Key:
+
+`docker-compose exec backend php artisan key:generate`
+
+8. Run migrations:
+
+`docker-compose exec backend php artisan migrate`
+
+9. Set permissions:
+
+`docker-compose exec backend sh -c "php artisan storage:link && touch /var/www/html/storage/logs/laravel.log && chown -R www-data:www-data /var/www/html && chmod -R 775 /var/www/html/bootstrap/cache && chmod -R 775 /var/www/html/storage"`
 ## Usage
 
-To access the application, open a web browser and navigate to http://localhost:3000/. From here, you can interact with the web application as you normally would.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+To access the application, open a web browser and navigate to http://localhost:3000. From here, you can interact with the web application as you normally would,
+the backend is accesible in  http://localhost:8080.
