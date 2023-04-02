@@ -3,9 +3,6 @@ version: '3.8'
 services:
   backend:
     build:
-      args:
-        user: doe
-        uid: 1000
       context: ./backend
       dockerfile: Dockerfile
     container_name: backend
@@ -26,15 +23,15 @@ services:
       - app-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: node:14-alpine
     container_name: frontend
     volumes:
       - ./frontend:/app
     restart: always
+    working_dir: '/app'
     ports:
       - "3000:3000"
+    command: sh -c "npm install && npm start"
     networks:
       - app-network
 

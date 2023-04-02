@@ -1,8 +1,5 @@
 FROM php:8.0-fpm-alpine
 
-ARG user
-ARG uid
-
 # Install dependencies
 RUN apk add --no-cache \
     $PHPIZE_DEPS \
@@ -20,11 +17,6 @@ RUN docker-php-ext-install pdo_mysql zip opcache
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Create system user to run Composer and Artisan Commands
-RUN adduser -u $uid -D -h /home/$user $user && \
-    mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
 
 # Copy project and install dep
 WORKDIR /var/www/html
@@ -48,5 +40,3 @@ EXPOSE 8080
 
 # Start supervisord
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
-USER $user
