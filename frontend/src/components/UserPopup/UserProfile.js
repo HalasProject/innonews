@@ -234,7 +234,7 @@ function UserProfile() {
         </div>
 
         <div className="flex flex-col">
-          <label forHtml="file_input" className="mb-2 text-gray-400">
+          <label className="mb-2 text-gray-400">
             Select Avatar
           </label>
           <div className="flex flex-row">
