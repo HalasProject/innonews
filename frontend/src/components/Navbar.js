@@ -45,18 +45,18 @@ function Navbar() {
             </span>
           )}
           {user && (
-            <span className="flex flex-row items-center space-x-3 px-5 py-2.5 transition-all ease-in duration-75 bg-whit bg-gray-900 rounded-md group-hover:bg-opacity-0">
-              <div className="w-8 h-8 rounded-full">
+            <span className="flex flex-row items-center justify-center space-x-3 px-5 py-2.5 transition-all ease-in duration-75  bg-gray-900 rounded-md group-hover:bg-opacity-0">
+              <div className="w-8 h-8 bg-gray-200 grow-0 shrink-0 overflow-hidden flex justify-center items-center rounded-full">
                 {user.avatar && (
                   <img
-                    className="object-cover w-full h-full rounded-full"
+                    className="object-contain full w-full"
                     src={imageUrl(user.avatar)}
                   />
                 )}
                 {!user.avatar && (
                   <UserCircleIcon
                     fill="none"
-                    className="w-full h-full rounded-full"
+                    className="object-cover rounded-full"
                   />
                 )}
               </div>

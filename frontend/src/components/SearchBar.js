@@ -197,7 +197,7 @@ const SearchBar = React.memo(() => {
           primaryColor={"red"}
           value={date}
           placeholder={"Date range"}
-          inputClassName="rounded-lg md:rounded-none w-full !bg-gray-700 dark:!bg-gray-700"
+          inputClassName="rounded-lg md:rounded-none w-full border-gray-600 !text-gray-100 !bg-gray-700 dark:!bg-gray-700"
           showFooter={true}
           onChange={handleDateChange}
         />
