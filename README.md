@@ -1,3 +1,7 @@
+<p align="center">
+   <img src="https://raw.githubusercontent.com/HalasProject/innonews/main/landing_page.png" />
+</p>
+
 # Innonews
 
 This web application uses Docker to create a portable development environment. It consists of three Docker containers: frontend, backend, and MySql database.
